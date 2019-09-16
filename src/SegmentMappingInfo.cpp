@@ -226,16 +226,28 @@ bool SegmentMappingInfo::writeSegmentOutput(const std::string& segFile, const st
      ofile2 << kv.first << '\t' << kv.second.typeCounts[0] << '\n' ;
   }
   ofile2.close();
-  std::cerr << "\n Found " << multimaps_.size() << " multimapping segment-Pair Classes (MPCs)\n";
+  std::cerr << "\n Found " << multimaps_.size() << " Multimapping segment-Pair Classes (MPCs)\n";
 
+  // Write New Junctions
+  std::ofstream ofile3(segFile+".tsv.njpcounts");
+  auto lt3 = newJuncsJPCountMap_.lock_table();
+  for (auto& kv : lt3) {
+    auto sp = kv.first;
+    ofile3 << segNames[sp.first] << '\t' ;
 
-//  std::ofstream ofile2(segFile+".tsv.multimappings");
-//  for (auto& kv : segMultimappings_) {
-//     auto seg = kv.first;
-//     auto count = kv.second;
-//     ofile2 << segNames[seg] << '\t' << count << '\n' ;
-//  }
-//  ofile2.close();
+    if (sp.second < std::numeric_limits<decltype(sp.second)>::max()) {
+      ofile3 << segNames[sp.second];
+    } else {
+      ofile3 << "NA";
+    }
+
+    for (size_t i = 0; i < 8; ++i) {
+      ofile3 << '\t' << kv.second.typeCounts[i];
+    }
+    ofile3 << '\n';
+  }
+  ofile3.close();
+
 
   return true;
 }

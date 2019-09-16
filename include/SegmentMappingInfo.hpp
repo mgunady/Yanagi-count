@@ -114,11 +114,6 @@ public:
     };
     SegmentCountValue v; v.typeCounts[mappingType] = 1;
     countMap_.upsert(p, upfn, v);
-
-//    if(isMultimapped) {
-//      segMultimappings_[s1] ++;
-//      if(s1 != s2) {segMultimappings_[s2] ++;}
-//    }
   }
 
   void addMultimap(std::string segMultiClass) { 
@@ -127,11 +122,19 @@ public:
     multimaps_.upsert(segMultiClass, upfn, v);  
   }
 
+  void addJPHit(SegmentIDType s1, SegmentIDType s2) {
+    auto p = std::make_pair(s1, s2);
+    auto upfn = [](SegmentCountValue& x) -> void { x.typeCounts[0] += 1; };
+    SegmentCountValue v; v.typeCounts[0] = 1;
+    newJuncsJPCountMap_.upsert(p, upfn, v);
+  }
+
+
   bool writeSegmentOutput(const std::string& segFile, const std::vector<std::string>& segNames);
 
   uint32_t getSegTxPosition(int32_t segID, int32_t txID) const { return segTxPos_.find(std::make_pair(segID, txID))->second; }
   
-//  uint32_t getNumTxsInGene(int32_t segID) { return numTxsInGene_[segID];}
+  int32_t getGeneOfSeg(int32_t sid) const { return genesList_[sid];}
 
 private:
     struct pairhash {
@@ -161,6 +164,7 @@ private:
   cuckoohash_map<std::pair<SegmentIDType, SegmentIDType>, std::vector<TranscriptIDType>, pairhash> pairTxMap_;
   
   cuckoohash_map<std::string, SegmentCountValue> multimaps_;
+  cuckoohash_map<std::pair<SegmentIDType, SegmentIDType>, SegmentCountValue, pairhash> newJuncsJPCountMap_;
 
 };
 

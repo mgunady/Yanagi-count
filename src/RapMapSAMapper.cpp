@@ -151,6 +151,8 @@ struct MappingOpts {
   bool writeUnmapped{false};
 };
 
+using MappingTests = rapmap::utils::MappingTests;
+
 using AlnCacheMap = selective_alignment::utils::AlnCacheMap;
 
 template <typename RapMapIndexT, typename MutexT>
@@ -396,7 +398,7 @@ void processReadsPairSA(paired_parser* parser,
 
     SACollector<RapMapIndexT> hitCollector(&rmi);
     bool isSegmentIndex = rmi.isSegmentIndex();
-	SegmentMappingInfo* smap = isSegmentIndex ? rmi.segInfo.get() : nullptr;
+    SegmentMappingInfo* smap = isSegmentIndex ? rmi.segInfo.get() : nullptr;
 
     if (mopts->sensitive) {
         hitCollector.disableNIP();
@@ -502,6 +504,7 @@ void processReadsPairSA(paired_parser* parser,
            rapmap::hit_manager::hitsToMappingsSimple(rmi, mc,
                                                      MateStatus::PAIRED_END_RIGHT,
                                                      rightHCInfo, rightHits);
+           MappingTests mapTestFlags;
 
            if (useSmartIntersect) {
              using rapmap::utils::MergeResult;
@@ -511,7 +514,10 @@ void processReadsPairSA(paired_parser* parser,
                                                                     lh, rh,
                                                                     leftHits, rightHits, jointHits,
                                                                     mc,
-                                                                    readLen, mopts->maxNumHits, tooManyHits, hctr, rmi.segInfo.get());
+                                                                    readLen, mopts->maxNumHits, tooManyHits, hctr, rmi.segInfo.get(), mapTestFlags);
+ 
+std::string str1 ("read2449068/ENST00000369189");
+if(rpair.first.name.compare(str1)==0) {std::cerr << "\nread2449068/ENST00000369189\n"; mapTestFlags.print_flags(); std::cerr << "\n";}
              } else {
                 mergeRes = rapmap::utils::mergeLeftRightHitsFuzzy(
                                                                     lh, rh,
@@ -792,6 +798,26 @@ void processReadsPairSA(paired_parser* parser,
               } else {
                 rapmap::utils::writeUnalignedPairToStream(rpair, sstream);
                 numUnaligned += 1;
+//std::cerr <<  jointHits.size() << " " << leftHits.size() << " " <<  rightHits.size() << "\n";
+                // Discover Junctions using Junc-Pair
+                if(leftHits.size()>0 && rightHits.size()>0 && !tooManyHits) {
+                    for (auto& lh : leftHits) {
+                      for (auto& rh : rightHits) {
+                       	auto segID1 = lh.tid;
+			auto segID2 = rh.tid;
+			auto gene1 = smap->getGeneOfSeg(segID1);
+			auto gene2 = smap->getGeneOfSeg(segID2);
+                        auto smallerSegID = (segID1 < segID2) ? segID1 : segID2;
+                        auto largerSegID = (segID1 < segID2) ? segID2 : segID1;
+                        if(gene1 == gene2) { // TODO: add dovetail and other necessary conditions
+                           smap->addJPHit(smallerSegID, largerSegID);
+if(segID1==261066 && segID2 == 261070) std::cerr <<  rpair.first.name << " " << leftHits.size() << " " <<  rightHits.size() << "\n";
+
+                        }
+                      }
+                    }
+                } // End Junc-Pair
+
               }
             }
 

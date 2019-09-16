@@ -84,6 +84,18 @@ namespace rapmap {
     constexpr uint32_t newTxpSetMask = 0x80000000;
     constexpr uint32_t rcSetMask = 0x40000000;
 
+    struct MappingTests {
+      std::array<bool, 8> flags{{0, 0, 0, 0, 0, 0, 0, 0}};//{txpCons, maxHits, dovetail, leftScore, rightScore, leftOrphan, rightOrphan, maxFragLen}
+      void print_flags(){for(auto i = 0; i < 8; i++) std::cerr<<flags[i]<<' ';}
+    };
+
+    template<typename T, size_t n>
+    void print_array(T const(& arr)[n]) {
+	for (size_t i = 0; i < n; i++)
+		std::cout << arr[i] << ' ';
+    }
+
+
     class MappingConfig {
     public:
       bool consistentHits{false};
@@ -1279,8 +1291,9 @@ namespace rapmap {
                 uint32_t readLen,
                 uint32_t maxNumHits,
                 bool& tooManyHits,
-                HitCounters& hctr
-                ,SegmentMappingInfo* smap
+                HitCounters& hctr,
+                SegmentMappingInfo* smap, 
+                MappingTests& mapTestFlags
 				) {
           using rapmap::utils::MergeResult;
           MergeResult mergeRes{MergeResult::HAD_NONE};
@@ -1297,6 +1310,7 @@ auto logger = spdlog::get("stderrLog");
                                 std::make_move_iterator(rightHits.end()));
                         hctr.seHits += rightHits.size();
                         mergeRes = MergeResult::HAD_ONLY_RIGHT;
+                        mapTestFlags.flags[5]=1;
                     }
                 }
             } else if (rightHits.empty()) {
@@ -1307,6 +1321,7 @@ auto logger = spdlog::get("stderrLog");
                                 std::make_move_iterator(leftHits.end()));
                         hctr.seHits += leftHits.size();
                         mergeRes = MergeResult::HAD_ONLY_LEFT;
+                        mapTestFlags.flags[6]=1;
                     }
                 }
             } else {
@@ -1339,6 +1354,7 @@ auto logger = spdlog::get("stderrLog");
 //std::cerr << "\n in condition " << posInTx1 << " " << posInTx2 << "\n";
 
 								++sameTxpCount;
+                                                                mapTestFlags.flags[0]=1;
 								
 								// returned tuple is fwPos, rcPos, gapLength
 								auto findBestHitFWRC = [signedZero, considerMultiPos, allowDovetail, &hadOppositeStrandMapping, 
@@ -1457,6 +1473,7 @@ auto logger = spdlog::get("stderrLog");
                               auto bestFWRC = findBestHitFWRC(leftFwdHits, rightRCHits, static_cast<int32_t>(lh.readLen), bestHitIsDovetailFWRC);
                               auto bestRCFW = findBestHitFWRC(rightFwdHits, leftRCHits, static_cast<int32_t>(rh.readLen), bestHitIsDovetailRCFW);
                               bestMappingIsDovetail = (bestMappingIsDovetail and bestHitIsDovetailFWRC and bestHitIsDovetailRCFW);
+                              mapTestFlags.flags[2]=1;
 //std::cerr << "\n bestMappingIsDovetail " << static_cast<bool>(bestMappingIsDovetail) << " " << static_cast<bool>(allowDovetail) << "\n\n";
 
                               bool foundValidHit{false};
@@ -1510,7 +1527,7 @@ auto logger = spdlog::get("stderrLog");
                                 ++numHits;
 //std::cerr << "\n align " << qaln.matePos << "\n"; 
                                 mergeRes = MergeResult::HAD_CONCORDANT;
-                                if (numHits > maxNumHits) { tooManyHits = true; break; }
+                                if (numHits > maxNumHits) { tooManyHits = true; mapTestFlags.flags[1]=1; break; }
                               }
 								
 							}
