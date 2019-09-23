@@ -672,8 +672,6 @@ void processReadsPairSA(paired_parser* parser,
                  } else {
                    score = s1 + s2;
                  }
-//std::cerr << ">>>" << h.tid << " " << s1 << " ";
-//std::cerr << h.tid2 << " " << s2 << "\n";
                } else if (h.mateStatus == rapmap::utils::MateStatus::PAIRED_END_LEFT) {
                  if (!h.fwd and !r1rc) {
                    rapmap::utils::reverseRead(rpair.first.seq, rc1);
@@ -709,7 +707,6 @@ void processReadsPairSA(paired_parser* parser,
                bestScore = (score > bestScore) ? score : bestScore;
                scores[idx] = score;
                h.score(score);
-//std::cerr << h.tid2 << " " << score << "\n";
                ++idx;
              } // End for jointHits
              uint32_t ctr{0};

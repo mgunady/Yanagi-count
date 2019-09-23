@@ -917,6 +917,22 @@ namespace rapmap {
                 std::vector<QuasiAlignment>& jointHits,
                 fmt::MemoryWriter& sstream);
 
+      template <typename ReadPairT, typename IndexT>
+      uint32_t writeSegmentOutputToStream(
+                                       ReadPairT& r,
+                                       PairAlignmentFormatter<IndexT>& formatter,
+                                       HitCounters& hctr,
+                                       std::vector<QuasiAlignment>& jointHits,
+                                       fmt::MemoryWriter& sstream);
+
+      template <typename ReadT, typename IndexT>
+      uint32_t writeSegmentOutputToStream(
+                                       ReadT& r,
+                                       SingleAlignmentFormatter<IndexT>& formatter,
+                                       HitCounters& hctr,
+                                       std::vector<QuasiAlignment>& jointHits,
+                                       fmt::MemoryWriter& sstream);
+
         inline MateStatus mergeMatchType(MateStatus leftT, MateStatus rightT) {
           if (leftT == MateStatus::NOTHING) {
             return rightT;
