@@ -1,7 +1,7 @@
-prefix=/fs/cbcb-scratch/mgunady/SalmonSashimi/RapMap/external/install
+prefix=/home/hirak/Projects/Yanagi-count/external/install
 exec_prefix=${prefix}
-libdir=/fs/cbcb-scratch/mgunady/SalmonSashimi/RapMap/external/install/lib
-includedir=/fs/cbcb-scratch/mgunady/SalmonSashimi/RapMap/external/install/include
+libdir=/home/hirak/Projects/Yanagi-count/external/install/lib
+includedir=/home/hirak/Projects/Yanagi-count/external/install/include
 
 Name: libdivsufsort64
 Description: A lightweight suffix sorting library

@@ -497,6 +497,11 @@ void processReadsPairSA(paired_parser* parser,
                                    saSearcher,
                                    rightHCInfo);
 
+            //Given any end of the reads we set to find out if
+            //the read is split between two segments or not
+            //and simply set the corresponding flags in the
+            //quasi alignment object.
+
            rapmap::hit_manager::hitsToMappingsSimple(rmi, mc,
                                                      MateStatus::PAIRED_END_LEFT,
                                                      leftHCInfo, leftHits);
@@ -504,6 +509,9 @@ void processReadsPairSA(paired_parser* parser,
            rapmap::hit_manager::hitsToMappingsSimple(rmi, mc,
                                                      MateStatus::PAIRED_END_RIGHT,
                                                      rightHCInfo, rightHits);
+
+
+
            MappingTests mapTestFlags;
 
            if (useSmartIntersect) {
@@ -515,9 +523,11 @@ void processReadsPairSA(paired_parser* parser,
                                                                     leftHits, rightHits, jointHits,
                                                                     mc,
                                                                     readLen, mopts->maxNumHits, tooManyHits, hctr, rmi.segInfo.get(), mapTestFlags);
- 
-std::string str1 ("read2449068/ENST00000369189");
-if(rpair.first.name.compare(str1)==0) {std::cerr << "\nread2449068/ENST00000369189\n"; mapTestFlags.print_flags(); std::cerr << "\n";}
+
+
+                //std::string str1 ("read2449068/ENST00000369189");
+                //if(rpair.first.name.compare(str1)==0) {std::cerr << "\nread2449068/ENST00000369189\n"; mapTestFlags.print_flags(); std::cerr << "\n";}
+
              } else {
                 mergeRes = rapmap::utils::mergeLeftRightHitsFuzzy(
                                                                     lh, rh,
@@ -591,7 +601,7 @@ if(rpair.first.name.compare(str1)==0) {std::cerr << "\nread2449068/ENST000003691
                  jointHits.clear();
                }
              }
-           }              
+           }
 
            // Start: If requested, perform selective alignment
            if (mopts->selAln and !jointHits.empty()) {
@@ -618,11 +628,11 @@ if(rpair.first.name.compare(str1)==0) {std::cerr << "\nread2449068/ENST000003691
                auto txpID = h.tid;
                char* tseq = const_cast<char*>(rmi.seq.data()) + rmi.txpOffsets[txpID];
                const int32_t tlen = static_cast<int32_t>(rmi.txpLens[txpID]);
-               
+
                auto txpID2 = isSegmentIndex ? h.tid2 : txpID;
                char* tseq2 = isSegmentIndex ? const_cast<char*>(rmi.seq.data()) + rmi.txpOffsets[txpID2] : tseq;
                const int32_t tlen2 = isSegmentIndex ? static_cast<int32_t>(rmi.txpLens[txpID2]) : tlen;
-               
+
                const uint32_t buf{20};
 
                if (h.mateStatus == rapmap::utils::MateStatus::PAIRED_END_PAIRED) {
@@ -804,9 +814,9 @@ if(rpair.first.name.compare(str1)==0) {std::cerr << "\nread2449068/ENST000003691
                     for (auto& lh : leftHits) {
                       for (auto& rh : rightHits) {
                        	auto segID1 = lh.tid;
-			auto segID2 = rh.tid;
-			auto gene1 = smap->getGeneOfSeg(segID1);
-			auto gene2 = smap->getGeneOfSeg(segID2);
+                        auto segID2 = rh.tid;
+                        auto gene1 = smap->getGeneOfSeg(segID1);
+                        auto gene2 = smap->getGeneOfSeg(segID2);
                         auto smallerSegID = (segID1 < segID2) ? segID1 : segID2;
                         auto largerSegID = (segID1 < segID2) ? segID2 : segID1;
                         if(gene1 == gene2) { // TODO: add dovetail and other necessary conditions

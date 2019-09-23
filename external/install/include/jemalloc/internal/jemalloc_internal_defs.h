@@ -171,7 +171,7 @@
 /* #undef JEMALLOC_UTRACE */
 
 /* Support Valgrind. */
-/* #undef JEMALLOC_VALGRIND */
+#define JEMALLOC_VALGRIND 
 
 /* Support optional abort() on OOM. */
 /* #undef JEMALLOC_XMALLOC */
@@ -268,7 +268,7 @@
  *                                 new pages will be demand-zeroed if the
  *                                 address region is later touched.
  */
-/* #undef JEMALLOC_PURGE_MADVISE_FREE */
+#define JEMALLOC_PURGE_MADVISE_FREE 
 #define JEMALLOC_PURGE_MADVISE_DONTNEED 
 
 /* Defined if transparent huge page support is enabled. */

@@ -304,6 +304,44 @@ namespace rapmap {
     using PositionList = std::vector<uint32_t>;
     using KmerInfoList = std::vector<KmerInfo>;
 
+      // Yanage related fields
+      enum class SegmentStatus : uint8_t {
+        PERFECT = 0, // there is nothing to discover the segment pair is consistent
+        UNANNOTATED = 1, // the segments are from same gene but not from the same transcript
+        FARAWAY = 2, // the distance between the fragments are larger than reasonable
+        FUSION = 3, // the segments belong to two different genes [not acknowledged now]
+      };
+
+      // Which segment is splitted
+      enum class SplitStatus : uint8_t {
+        NO_SPLIT = 0,
+        SPLITTED = 1
+      } ;
+
+
+      inline std::ostream& operator<<(std::ostream& os, SegmentStatus s) {
+        switch (s) {
+        case SegmentStatus::PERFECT:
+          os << "PERFECT";
+          break;
+        case SegmentStatus::UNANNOTATED:
+          os << "UNGAPPED";
+          break;
+        case SegmentStatus::FARAWAY:
+          os << "FARAWAY";
+          break;
+        case SegmentStatus::FUSION:
+          os << "FUSION";
+          break;
+        default:
+          os << "UNKNOWN";
+          break;
+        }
+        return os;
+      }
+
+
+
     enum class ChainStatus : uint8_t {
       PERFECT = 0,
       UNGAPPED = 1,
@@ -430,10 +468,12 @@ namespace rapmap {
 
         QuasiAlignment(uint32_t tidIn, int32_t posIn,
                 bool fwdIn, uint32_t readLenIn,
+                uint32_t mmpLenIn = 0,
                 uint32_t fragLenIn = 0,
                 bool isPairedIn = false) :
             tid(tidIn), pos(posIn), fwd(fwdIn),
-            fragLen(fragLenIn), readLen(readLenIn), 
+            fragLen(fragLenIn), readLen(readLenIn),
+            mmpLen{mmpLenIn},
             isPaired(isPairedIn), tid2(-1)
 #ifdef RAPMAP_SALMON_SUPPORT
         ,format(LibraryFormat::formatFromID(0))
@@ -488,8 +528,17 @@ namespace rapmap {
        chobo::small_vector<int32_t> allPositions;
        chobo::small_vector<int32_t> oppositeStrandPositions;
 
+       // for split reads segments we need the chain end positions
+      chobo::small_vector<int32_t> queryStartPositions;
+      chobo::small_vector<int32_t> oppositeStrandQueryStartPositions;
+      chobo::small_vector<int32_t> queryEndPositions;
+      chobo::small_vector<int32_t> oppositeStrandQueryEndPositions;
+      // This all can be accomodated in validStartEndQueryPairs ;
+      std::vector<std::pair<int32_t, int32_t>> validChainStartEnd ;
+
         // Only 1 since the mate must have the same tid
         // we won't call *chimeric* alignments here.
+
         uint32_t tid;
         uint32_t tid2; //in case of segments
         // Left-most position of the hit
@@ -514,6 +563,12 @@ namespace rapmap {
         double score_{1.0};
         // actual ``alignment'' score associated with this mapping.
         int32_t alnScore_{0};
+        // MMP match length, it is only relevant while finding the length of maps within segment
+        uint32_t mmpLen{0} ;
+        // SegmentStatus would be stored here
+        SegmentStatus segmentStaus ;
+        // Split segment would be stored here
+        SplitStatus splitStaus{SplitStatus::NO_SPLIT} ;
         // If one or both of the reads is a complete match (no mismatch, indels), say what kind.
         FragmentChainStatus chainStatus;
         double chainScore_{std::numeric_limits<double>::lowest()};
