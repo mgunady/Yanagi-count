@@ -26,3 +26,12 @@
 *.exe
 *.out
 *.app
+
+# External files
+external/cereal-*
+external/install
+external/jemalloc-*
+external/libdivsufsort-master
+
+# Binary file
+build/
