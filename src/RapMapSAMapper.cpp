@@ -803,7 +803,7 @@ void processReadsPairSA(paired_parser* parser,
                                                            hctr, jointHits, sstream);
                 }
               } else {
-                rapmap::utils::writeUnalignedPairToStream(rpair, sstream);
+                //rapmap::utils::writeUnalignedPairToStream(rpair, sstream);
                 numUnaligned += 1;
 //std::cerr <<  jointHits.size() << " " << leftHits.size() << " " <<  rightHits.size() << "\n";
                 // Discover Junctions using Junc-Pair
@@ -816,8 +816,10 @@ void processReadsPairSA(paired_parser* parser,
                         auto gene2 = smap->getGeneOfSeg(segID2);
                         auto smallerSegID = (segID1 < segID2) ? segID1 : segID2;
                         auto largerSegID = (segID1 < segID2) ? segID2 : segID1;
-                        if(gene1 == gene2) { // TODO: add dovetail and other necessary conditions
-                           smap->addJPHit(smallerSegID, largerSegID);
+                        auto smallerPos = (segID1 < segID2) ? lh.pos : rh.pos;
+                        auto largerPos = (segID1 < segID2) ? rh.pos : lh.pos;
+                        if(gene1 == gene2 && smallerPos > 0 && largerPos > 0) { // TODO: add dovetail and other necessary conditions
+                           smap->addJPHit(smallerSegID, largerSegID, smallerPos, largerPos);
 if(segID1==261066 && segID2 == 261070) std::cerr <<  rpair.first.name << " " << leftHits.size() << " " <<  rightHits.size() << "\n";
 
                         }

@@ -187,13 +187,17 @@ void SegmentMappingInfo::serialize(const std::string& outDir) {
 
 bool SegmentMappingInfo::writeSegmentOutput(const std::string& segFile, const std::vector<std::string>& segNames) {
   std::ofstream ofile(segFile+".tsv");
-//std::cerr << segNames[410295] << " " << segNames[492716] << "\n";
+  
+  auto lt = countMap_.lock_table();
+
+  ofile << "SEG1ID" << '\t';
+  if(lt.begin()->first.second < std::numeric_limits<decltype(lt.begin()->first.second)>::max())
+     ofile << "SEG2ID" << '\t';
+  ofile << "count" << '\n';
 
   // number of segments
   //ofile << segNames.size() << '\n';
   //ofile << txpNames_.size() << '\n';
-
-  auto lt = countMap_.lock_table();
 
   //ofile << lt.size() << '\n';
 
@@ -203,18 +207,19 @@ bool SegmentMappingInfo::writeSegmentOutput(const std::string& segFile, const st
 
   for (auto& kv : lt) {
     auto sp = kv.first;
-    ofile << segNames[sp.first] << '\t' ;
+    ofile << segNames[sp.first];
 
     if (sp.second < std::numeric_limits<decltype(sp.second)>::max()) {
-      ofile << segNames[sp.second];
+      ofile << '\t' << segNames[sp.second];
     } else {
-      ofile << "NA";
+      ofile << '\t' << "NA";
     }
 
+    uint32_t tot = 0;
     for (size_t i = 0; i < 8; ++i) {
-      ofile << '\t' << kv.second.typeCounts[i];
+      tot += kv.second.typeCounts[i];
     }
-    ofile << '\n';
+    ofile  << '\t' << tot << '\n';
   }
 
   ofile.close();
@@ -240,6 +245,7 @@ bool SegmentMappingInfo::writeSegmentOutput(const std::string& segFile, const st
     } else {
       ofile3 << "NA";
     }
+    ofile3 << '\t' << geneNames_[getGeneOfSeg(sp.first)];
 
     for (size_t i = 0; i < 8; ++i) {
       ofile3 << '\t' << kv.second.typeCounts[i];
