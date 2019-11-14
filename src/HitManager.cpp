@@ -275,7 +275,7 @@ namespace rapmap {
                   currHit.setChainScore(bestScore);
                   currHit.mateStatus = mateStatus;
                   currHit.allPositions.push_back(hitPos);
-                  currHit.queryStartPositions.push_back((*posIt)->queryPos);
+                  // currHit.queryStartPositions.push_back((*posIt)->queryPos);
 
                   // copy the vector
                   // I feel really stupid to this
@@ -922,45 +922,44 @@ namespace rapmap {
         // hits on each end, we assume that the hits are sorted by transcript ids
         bool validSplit = false ;
 
-        for(size_t i = 0; i < hits.size() - 1 ; ++i){
-          auto& hi = hits[i] ;
-          auto segIDi = hi.tid ;
-          auto genei = smap->getGeneOfSeg(segIDi) ;
-          // Get the start positions and end position for this i
-          // ChainStartEnd
-          auto validChainStartEndi = hi.validChainStartEnd ;
+        //for(size_t i = 0; i < hits.size() - 1 ; ++i){
+        //  auto& hi = hits[i] ;
+        //  auto segIDi = hi.tid ;
+        //  auto genei = smap->getGeneOfSeg(segIDi) ;
+        //  // Get the start positions and end position for this i
+        //  // ChainStartEnd
+        //  auto validChainStartEndi = hi.validChainStartEnd ;
 
-          for(size_t j = i+1; j < hits.size() ; ++j){
-            if(validSplit)
-              break ;
-            auto& hj = hits[j] ;
-            auto segIDj = hj.tid ;
-            auto genej = smap->getGeneOfSeg(segIDj) ;
-            auto startQueryPosj = hj.queryStartPositions ;
-            auto endQueryPosj = hj.queryEndPositions ;
-            auto validChainStartEndj = hj.validChainStartEnd ;
-            if((genei == genej) && (segIDi != segIDj)){
-              for(auto sei : validChainStartEndi){
-                for(auto sej : validChainStartEndj){
-                  if(sei.second < sej.first){
-                    validSplit = true ;
-                    break ;
-                  }
-                }
-                if(validSplit)
-                  break ;
-              }
-            }
-            if(validSplit){
-              hj.splitStaus = rapmap::utils::SplitStatus::SPLITTED ;
-              break ;
-            }
-          }
-          if(validSplit){
-            hi.splitStaus = rapmap::utils::SplitStatus::SPLITTED ;
-            break ;
-          }
-        }
+        //  for(size_t j = i+1; j < hits.size() ; ++j){
+        //    if(validSplit)
+        //      break ;
+        //    auto& hj = hits[j] ;
+        //    auto segIDj = hj.tid ;
+        //    auto genej = smap->getGeneOfSeg(segIDj) ;
+        //    auto validChainStartEndj = hj.validChainStartEnd ;
+        //    if((genei == genej) && (segIDi != segIDj)){
+        //      for(auto sei : validChainStartEndi){
+        //        for(auto sej : validChainStartEndj){
+        //          if(sei.second < sej.first){
+        //            validSplit = true ;
+        //            break ;
+        //          }
+        //        }
+        //        if(validSplit)
+        //          break ;
+        //      }
+        //    }
+        //    if(validSplit){
+        //      hj.splitStaus = rapmap::utils::SplitStatus::SPLITTED ;
+        //      break ;
+        //    }
+        //  }
+        //  if(validSplit){
+        //    hi.splitStaus = rapmap::utils::SplitStatus::SPLITTED ;
+        //    break ;
+        //  }
+        //}
+
       }
 
 

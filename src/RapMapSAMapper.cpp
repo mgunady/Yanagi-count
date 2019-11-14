@@ -511,6 +511,29 @@ void processReadsPairSA(paired_parser* parser,
                                                      rightHCInfo, rightHits);
 
 
+           // Test if we catch the intervals
+           //if(lh){
+           //  for(auto& hit : leftHits){
+           //    for(auto& se : hit.validChainStartEnd){
+           //      if(true or rpair.second.name == "read225/SEG0049632"){
+           //        std::cerr << "LEFT HIT \n" ;
+           //        std::cerr << "------------------------------------------\n" ;
+           //        std::cerr << rpair.first.name << "\t" << hit.tid << "\t" << se.first << "\t" << se.second << "\t"  << readLen <<  "\n" ;
+           //      }
+           //    }
+           //  }
+           //}
+           //if(rh){
+           //  for(auto& hit : rightHits){
+           //    for(auto& se : hit.validChainStartEnd){
+           //      if(true or rpair.second.name == "read225/SEG0049632"){
+           //        std::cerr << "RIGHT HIT \n" ;
+           //        std::cerr << "------------------------------------------\n" ;
+           //        std::cerr << rpair.second.name << "\t" << hit.tid << "\t" << se.first << "\t" << se.second << "\t"  << readLen <<  "\n" ;
+           //      }
+           //    }
+           //  }
+           //}
 
            MappingTests mapTestFlags;
 
