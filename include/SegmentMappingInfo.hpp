@@ -122,10 +122,19 @@ public:
     multimaps_.upsert(segMultiClass, upfn, v);  
   }
 
-  void addJPHit(SegmentIDType s1, SegmentIDType s2) {
+  void addJPHit(SegmentIDType s1, SegmentIDType s2, int32_t pos1, int32_t pos2) {
+    if(s1 == 204330 && s2 == 204332) {
+       std::cerr << s1 << ' ' << s2 << ' ' << pos1 << ' ' << pos2 << '\n';
+    }
     auto p = std::make_pair(s1, s2);
-    auto upfn = [](SegmentCountValue& x) -> void { x.typeCounts[0] += 1; };
-    SegmentCountValue v; v.typeCounts[0] = 1;
+    auto upfn = [pos1, pos2](SegmentCountValue& x) -> void { 
+       auto sumpos1 = x.typeCounts[0]*x.typeCounts[1] + pos1;
+       auto sumpos2 = x.typeCounts[0]*x.typeCounts[2] + pos2;
+       x.typeCounts[0] += 1;
+       x.typeCounts[1] = sumpos1/x.typeCounts[0];
+       x.typeCounts[2] = sumpos2/x.typeCounts[0]; 
+    };
+    SegmentCountValue v; v.typeCounts[0] = 1; v.typeCounts[1] = pos1; v.typeCounts[2] = pos2;
     newJuncsJPCountMap_.upsert(p, upfn, v);
   }
 
