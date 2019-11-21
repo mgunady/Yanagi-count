@@ -764,6 +764,7 @@ namespace rapmap {
               //lastHit.queryOffset = saIntervalHit.queryPos;
               lastHit.mateStatus = mateStatus;
               lastHit.allPositions.push_back(hitPos);
+              //[!Yanagi-discover] chain start end positions
               lastHit.validChainStartEnd.push_back({saIntervalHit.queryPos, saIntervalHit.queryPos + saIntervalHit.len}) ;
 
               lastHit.hasMultiPos = false;
@@ -781,6 +782,7 @@ namespace rapmap {
                 break;
               }
               // sort chains with respect to the begining
+              //[!Yanagi-discover] sort those positions accordingly
               std::sort(lastHit.validChainStartEnd.begin(), lastHit.validChainStartEnd.end(),
                         [](const std::pair<int32_t, int32_t>& a, const std::pair<int32_t, int32_t>& b) -> bool {
                           return a.first <= b.first ;
@@ -922,6 +924,8 @@ namespace rapmap {
         // hits on each end, we assume that the hits are sorted by transcript ids
         bool validSplit = false ;
 
+        //[!Yanagi-discover] the code for assigning split status
+        // will be commmented out in master
         //for(size_t i = 0; i < hits.size() - 1 ; ++i){
         //  auto& hi = hits[i] ;
         //  auto segIDi = hi.tid ;

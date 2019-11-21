@@ -528,12 +528,14 @@ namespace rapmap {
        chobo::small_vector<int32_t> allPositions;
        chobo::small_vector<int32_t> oppositeStrandPositions;
 
-      // for split reads segments we need the chain end positions
+      // [!Yanagi-discover] for split reads segments we need the chain end positions
       // chobo::small_vector<int32_t> queryStartPositions;
       // chobo::small_vector<int32_t> oppositeStrandQueryStartPositions;
       // chobo::small_vector<int32_t> queryEndPositions;
       // chobo::small_vector<int32_t> oppositeStrandQueryEndPositions;
       // This all can be accomodated in validStartEndQueryPairs ;
+
+      // [!Yanagi-discover] store the valid chain start end position
       std::vector<std::pair<int32_t, int32_t>> validChainStartEnd ;
       std::vector<std::pair<int32_t, int32_t>> mateValidChainStartEnd ;
 
