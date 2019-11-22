@@ -812,11 +812,6 @@ void processReadsPairSA(paired_parser* parser,
                         if (h.tid > h.tid2) { mappingType += 4; }
                         auto smallerSegID = (h.tid < h.tid2) ? h.tid : h.tid2;
                         auto largerSegID = (h.tid < h.tid2) ? h.tid2 : h.tid;
-//                        if((smallerSegID==6946 || largerSegID ==6946) && isMultimapped) 
-//                           std::cerr  << jointHits.size() << ' ' << numMultis << ' ' << rpair.first.name << ' ' << h.tid << ' ' << h.tid2 << ' ' << h.score() << '\n';
-//std::string str1 ("read18225926/ENST00000374956");
-//                        if(rpair.first.name.compare(str1)==0)
-//                           std::cerr  << "lol" << h.tid << ' ' << h.tid2 << " " << h.score() << " " << '\n';
                         smap->addHit(smallerSegID, largerSegID, mappingType);
                         if(jointHits.size() > 1) { segMultiClass += (segMultiClass.empty()? "" : ",") + std::to_string(smallerSegID)+"/"+std::to_string(largerSegID); }
                     }
@@ -826,9 +821,9 @@ void processReadsPairSA(paired_parser* parser,
                                                            hctr, jointHits, sstream);
                 }
               } else {
-                //rapmap::utils::writeUnalignedPairToStream(rpair, sstream);
+                rapmap::utils::writeUnalignedPairToStream(rpair, sstream);
                 numUnaligned += 1;
-//std::cerr <<  jointHits.size() << " " << leftHits.size() << " " <<  rightHits.size() << "\n";
+	if(false) {
                 // Discover Junctions using Junc-Pair
                 if(leftHits.size()>0 && rightHits.size()>0 && !tooManyHits) {
                     for (auto& lh : leftHits) {
@@ -843,12 +838,11 @@ void processReadsPairSA(paired_parser* parser,
                         auto largerPos = (segID1 < segID2) ? rh.pos : lh.pos;
                         if(gene1 == gene2 && smallerPos > 0 && largerPos > 0) { // TODO: add dovetail and other necessary conditions
                            smap->addJPHit(smallerSegID, largerSegID, smallerPos, largerPos);
-if(segID1==261066 && segID2 == 261070) std::cerr <<  rpair.first.name << " " << leftHits.size() << " " <<  rightHits.size() << "\n";
-
                         }
                       }
                     }
                 } // End Junc-Pair
+		 }
 
               }
             }
