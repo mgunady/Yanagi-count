@@ -63,6 +63,7 @@ bool SegmentMappingInfo::loadFromFile(const std::string& fname,
     segmentID[sn] = ctr;
     ++ctr;
   }
+  segNames = std::vector<std::string>(segmentNames);
 
   // number of segments we care about
   //txpListRanges_.resize(segmentNames.size());
@@ -181,6 +182,7 @@ void SegmentMappingInfo::serialize(const std::string& outDir) {
     segArchive(genesList_);
     segArchive(geneNames_);
     segArchive(segTxPos_);
+    segArchive(segNames);
   }
   mappingStream.close();
 }
@@ -269,6 +271,7 @@ void SegmentMappingInfo::load(const std::string& indDir) {
     segArchive(genesList_);
     segArchive(geneNames_);
     segArchive(segTxPos_);
+    segArchive(segNames);
   }
   mappingStream.close();
 }

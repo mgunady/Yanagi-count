@@ -787,16 +787,9 @@ void processReadsPairSA(paired_parser* parser,
             if (!mopts->noOutput) {
               if (jointHits.size() > 0 and jointHits.size() <= mopts->maxNumHits) {
                 if(isSegmentIndex) {
-//                    int numMultis = 0;
-//                    if(jointHits.size() > 1) {
-//                       for(auto& h : jointHits) {
-//                          if(smap->getNumTxsInGene(h.tid) > 1 || smap->getNumTxsInGene(h.tid2) > 1) { numMultis ++; }
-//                       }
-//                    }
-//                    bool isMultimapped = jointHits.size() > 1 ;//&& numMultis != 1;
                     std::string segMultiClass("");
+                    //std::cerr << jointHits.size() << "\n";
                     for(auto& h : jointHits) {
-//                        if(numMultis > 0 && smap->getNumTxsInGene(h.tid) == 1 && smap->getNumTxsInGene(h.tid2) == 1) continue;
                         // mapping types
                         // r1 -> lh : fwd, r2 -> rh : fwd = 3
                         // r1 -> lh : fwd, r2 -> rh : rc  = 2
@@ -812,8 +805,13 @@ void processReadsPairSA(paired_parser* parser,
                         if (h.tid > h.tid2) { mappingType += 4; }
                         auto smallerSegID = (h.tid < h.tid2) ? h.tid : h.tid2;
                         auto largerSegID = (h.tid < h.tid2) ? h.tid2 : h.tid;
-                        smap->addHit(smallerSegID, largerSegID, mappingType);
-                        if(jointHits.size() > 1) { segMultiClass += (segMultiClass.empty()? "" : ",") + std::to_string(smallerSegID)+"/"+std::to_string(largerSegID); }
+
+                        // If read is multimapped
+                        if(jointHits.size() > 1) { 
+                           segMultiClass += (segMultiClass.empty()? "" : ",") + smap->getSegID(smallerSegID)+"/"+smap->getSegID(largerSegID); //rmi.txpNames[smallerSegID]+"/"+rmi.txpNames[largerSegID]; 
+                        } else {
+                           smap->addHit(smallerSegID, largerSegID, mappingType);
+                        }
                     }
                     if(jointHits.size() > 1) { smap->addMultimap(segMultiClass);}
                 } else {

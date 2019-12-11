@@ -53,7 +53,7 @@ public:
 
   size_t numSegments() const { return txpListRanges_.size(); }
 
-  std::string getSegID(int64_t sID) const { return txpNames_[sID];}
+  std::string getSegID(int64_t sID) const { return segNames[sID];}
 
   nonstd::span<TranscriptIDType> transcriptsForSegment(int64_t segmentID) const {
     auto& p = txpListRanges_[segmentID];
@@ -123,9 +123,6 @@ public:
   }
 
   void addJPHit(SegmentIDType s1, SegmentIDType s2, int32_t pos1, int32_t pos2) {
-    if(s1 == 204330 && s2 == 204332) {
-       std::cerr << s1 << ' ' << s2 << ' ' << pos1 << ' ' << pos2 << '\n';
-    }
     auto p = std::make_pair(s1, s2);
     auto upfn = [pos1, pos2](SegmentCountValue& x) -> void { 
        auto sumpos1 = x.typeCounts[0]*x.typeCounts[1] + pos1;
@@ -167,6 +164,8 @@ private:
 
     std::vector<GeneIDType> genesList_;
     std::vector<std::string> geneNames_;
+
+    std::vector<std::string> segNames;
 
   std::map<std::pair<SegmentIDType, TranscriptIDType>, uint32_t> segTxPos_;
   cuckoohash_map<std::pair<SegmentIDType, SegmentIDType>, SegmentCountValue, pairhash> countMap_;
