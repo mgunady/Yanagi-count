@@ -497,11 +497,6 @@ void processReadsPairSA(paired_parser* parser,
                                    saSearcher,
                                    rightHCInfo);
 
-            //Given any end of the reads we set to find out if
-            //the read is split between two segments or not
-            //and simply set the corresponding flags in the
-            //quasi alignment object.
-
            rapmap::hit_manager::hitsToMappingsSimple(rmi, mc,
                                                      MateStatus::PAIRED_END_LEFT,
                                                      leftHCInfo, leftHits);
@@ -509,32 +504,6 @@ void processReadsPairSA(paired_parser* parser,
            rapmap::hit_manager::hitsToMappingsSimple(rmi, mc,
                                                      MateStatus::PAIRED_END_RIGHT,
                                                      rightHCInfo, rightHits);
-
-
-           // Test if we catch the intervals
-           //if(lh){
-           //  for(auto& hit : leftHits){
-           //    for(auto& se : hit.validChainStartEnd){
-           //      if(true or rpair.second.name == "read225/SEG0049632"){
-           //        std::cerr << "LEFT HIT \n" ;
-           //        std::cerr << "------------------------------------------\n" ;
-           //        std::cerr << rpair.first.name << "\t" << hit.tid << "\t" << se.first << "\t" << se.second << "\t"  << readLen <<  "\n" ;
-           //      }
-           //    }
-           //  }
-           //}
-           //if(rh){
-           //  for(auto& hit : rightHits){
-           //    for(auto& se : hit.validChainStartEnd){
-           //      if(true or rpair.second.name == "read225/SEG0049632"){
-           //        std::cerr << "RIGHT HIT \n" ;
-           //        std::cerr << "------------------------------------------\n" ;
-           //        std::cerr << rpair.second.name << "\t" << hit.tid << "\t" << se.first << "\t" << se.second << "\t"  << readLen <<  "\n" ;
-           //      }
-           //    }
-           //  }
-           //}
-
            MappingTests mapTestFlags;
 
            if (useSmartIntersect) {
@@ -546,11 +515,9 @@ void processReadsPairSA(paired_parser* parser,
                                                                     leftHits, rightHits, jointHits,
                                                                     mc,
                                                                     readLen, mopts->maxNumHits, tooManyHits, hctr, rmi.segInfo.get(), mapTestFlags);
-
-
-                //std::string str1 ("read2449068/ENST00000369189");
-                //if(rpair.first.name.compare(str1)==0) {std::cerr << "\nread2449068/ENST00000369189\n"; mapTestFlags.print_flags(); std::cerr << "\n";}
-
+ 
+std::string str1 ("read2449068/ENST00000369189");
+if(rpair.first.name.compare(str1)==0) {std::cerr << "\nread2449068/ENST00000369189\n"; mapTestFlags.print_flags(); std::cerr << "\n";}
              } else {
                 mergeRes = rapmap::utils::mergeLeftRightHitsFuzzy(
                                                                     lh, rh,
@@ -624,7 +591,7 @@ void processReadsPairSA(paired_parser* parser,
                  jointHits.clear();
                }
              }
-           }
+           }              
 
            // Start: If requested, perform selective alignment
            if (mopts->selAln and !jointHits.empty()) {
@@ -651,11 +618,11 @@ void processReadsPairSA(paired_parser* parser,
                auto txpID = h.tid;
                char* tseq = const_cast<char*>(rmi.seq.data()) + rmi.txpOffsets[txpID];
                const int32_t tlen = static_cast<int32_t>(rmi.txpLens[txpID]);
-
+               
                auto txpID2 = isSegmentIndex ? h.tid2 : txpID;
                char* tseq2 = isSegmentIndex ? const_cast<char*>(rmi.seq.data()) + rmi.txpOffsets[txpID2] : tseq;
                const int32_t tlen2 = isSegmentIndex ? static_cast<int32_t>(rmi.txpLens[txpID2]) : tlen;
-
+               
                const uint32_t buf{20};
 
                if (h.mateStatus == rapmap::utils::MateStatus::PAIRED_END_PAIRED) {
@@ -695,6 +662,8 @@ void processReadsPairSA(paired_parser* parser,
                  } else {
                    score = s1 + s2;
                  }
+//std::cerr << ">>>" << h.tid << " " << s1 << " ";
+//std::cerr << h.tid2 << " " << s2 << "\n";
                } else if (h.mateStatus == rapmap::utils::MateStatus::PAIRED_END_LEFT) {
                  if (!h.fwd and !r1rc) {
                    rapmap::utils::reverseRead(rpair.first.seq, rc1);
@@ -730,6 +699,7 @@ void processReadsPairSA(paired_parser* parser,
                bestScore = (score > bestScore) ? score : bestScore;
                scores[idx] = score;
                h.score(score);
+//std::cerr << h.tid2 << " " << score << "\n";
                ++idx;
              } // End for jointHits
              uint32_t ctr{0};
@@ -787,16 +757,8 @@ void processReadsPairSA(paired_parser* parser,
             if (!mopts->noOutput) {
               if (jointHits.size() > 0 and jointHits.size() <= mopts->maxNumHits) {
                 if(isSegmentIndex) {
-//                    int numMultis = 0;
-//                    if(jointHits.size() > 1) {
-//                       for(auto& h : jointHits) {
-//                          if(smap->getNumTxsInGene(h.tid) > 1 || smap->getNumTxsInGene(h.tid2) > 1) { numMultis ++; }
-//                       }
-//                    }
-//                    bool isMultimapped = jointHits.size() > 1 ;//&& numMultis != 1;
                     std::string segMultiClass("");
                     for(auto& h : jointHits) {
-//                        if(numMultis > 0 && smap->getNumTxsInGene(h.tid) == 1 && smap->getNumTxsInGene(h.tid2) == 1) continue;
                         // mapping types
                         // r1 -> lh : fwd, r2 -> rh : fwd = 3
                         // r1 -> lh : fwd, r2 -> rh : rc  = 2
@@ -812,13 +774,13 @@ void processReadsPairSA(paired_parser* parser,
                         if (h.tid > h.tid2) { mappingType += 4; }
                         auto smallerSegID = (h.tid < h.tid2) ? h.tid : h.tid2;
                         auto largerSegID = (h.tid < h.tid2) ? h.tid2 : h.tid;
-//                        if((smallerSegID==6946 || largerSegID ==6946) && isMultimapped) 
-//                           std::cerr  << jointHits.size() << ' ' << numMultis << ' ' << rpair.first.name << ' ' << h.tid << ' ' << h.tid2 << ' ' << h.score() << '\n';
-//std::string str1 ("read18225926/ENST00000374956");
-//                        if(rpair.first.name.compare(str1)==0)
-//                           std::cerr  << "lol" << h.tid << ' ' << h.tid2 << " " << h.score() << " " << '\n';
-                        smap->addHit(smallerSegID, largerSegID, mappingType);
-                        if(jointHits.size() > 1) { segMultiClass += (segMultiClass.empty()? "" : ",") + std::to_string(smallerSegID)+"/"+std::to_string(largerSegID); }
+
+                        // If read is multimapped
+                        if(jointHits.size() > 1) { 
+                           segMultiClass += (segMultiClass.empty()? "" : ",") + smap->getSegID(smallerSegID)+"/"+smap->getSegID(largerSegID); //rmi.txpNames[smallerSegID]+"/"+rmi.txpNames[largerSegID]; 
+                        } else {
+                           smap->addHit(smallerSegID, largerSegID, mappingType);
+                        }
                     }
                     if(jointHits.size() > 1) { smap->addMultimap(segMultiClass);}
                 } else {
@@ -826,29 +788,31 @@ void processReadsPairSA(paired_parser* parser,
                                                            hctr, jointHits, sstream);
                 }
               } else {
-                //rapmap::utils::writeUnalignedPairToStream(rpair, sstream);
+                rapmap::utils::writeUnalignedPairToStream(rpair, sstream);
                 numUnaligned += 1;
-//std::cerr <<  jointHits.size() << " " << leftHits.size() << " " <<  rightHits.size() << "\n";
+//	if(false) {
                 // Discover Junctions using Junc-Pair
                 if(leftHits.size()>0 && rightHits.size()>0 && !tooManyHits) {
                     for (auto& lh : leftHits) {
                       for (auto& rh : rightHits) {
                        	auto segID1 = lh.tid;
-                        auto segID2 = rh.tid;
-                        auto gene1 = smap->getGeneOfSeg(segID1);
-                        auto gene2 = smap->getGeneOfSeg(segID2);
+			auto segID2 = rh.tid;
+			auto gene1 = smap->getGeneOfSeg(segID1);
+			auto gene2 = smap->getGeneOfSeg(segID2);
                         auto smallerSegID = (segID1 < segID2) ? segID1 : segID2;
                         auto largerSegID = (segID1 < segID2) ? segID2 : segID1;
                         auto smallerPos = (segID1 < segID2) ? lh.pos : rh.pos;
                         auto largerPos = (segID1 < segID2) ? rh.pos : lh.pos;
-                        if(gene1 == gene2 && smallerPos > 0 && largerPos > 0) { // TODO: add dovetail and other necessary conditions
+                        //if(gene1 == gene2 && smallerPos > 0 && largerPos > 0) { // TODO: add dovetail and other necessary conditions
+                        if(gene1 == gene2 && 
+                           smallerPos > 0 && largerPos > 0 && 
+                           lh.chainStatus.getLeft() == rapmap::utils::ChainStatus::PERFECT && rh.chainStatus.getRight() == rapmap::utils::ChainStatus::PERFECT) { // TODO: add dovetail and other necessary conditions
                            smap->addJPHit(smallerSegID, largerSegID, smallerPos, largerPos);
-if(segID1==261066 && segID2 == 261070) std::cerr <<  rpair.first.name << " " << leftHits.size() << " " <<  rightHits.size() << "\n";
-
                         }
                       }
                     }
                 } // End Junc-Pair
+//	}
 
               }
             }

@@ -220,12 +220,9 @@ namespace rapmap {
                 auto numEnds = f.size();
                 size_t numDistinctOpt{0};
                 chobo::small_vector<int8_t> seen(numEnds, 0);
-                chobo::small_vector<decltype(minPosIt)> startPositions ;
-                std::vector<std::pair<int32_t, int32_t>> validChainStartEnd ;
-
+                chobo::small_vector<decltype(minPosIt)> startPositions;
                 auto lastChainHit = bestChainEnd;
                 for (auto bestChainEndInd : bestChainEndInds) {
-                  auto backupBestChainEndInd = bestChainEndInd ;
                   bool validChain{true};
                   if (bestChainEndInd >= 0) {
                     auto lastPtr = p[bestChainEndInd];
@@ -248,11 +245,6 @@ namespace rapmap {
                     if (validChain) {
                       ++numDistinctOpt;
                       startPositions.push_back(minPosIt + lastPtr);
-                      auto startPosIt = startPositions.back() ;
-                      auto actualQueryStartPosition = startPosIt->queryPos ;
-                      auto actualChainEndPos = hitVector[backupBestChainEndInd].queryPos +
-                        hitVector[backupBestChainEndInd].len ;
-                      validChainStartEnd.push_back({actualQueryStartPosition, actualChainEndPos}) ;
                     }
                   } else {
                     // should not happen
@@ -275,21 +267,6 @@ namespace rapmap {
                   currHit.setChainScore(bestScore);
                   currHit.mateStatus = mateStatus;
                   currHit.allPositions.push_back(hitPos);
-                  // currHit.queryStartPositions.push_back((*posIt)->queryPos);
-
-                  // copy the vector
-                  // I feel really stupid to this
-                  // like following, should have been
-                  // just copy the vector over by a function
-                  for(auto chainPair : validChainStartEnd){
-                    currHit.validChainStartEnd.push_back(chainPair) ;
-                  }
-                  // sort chains with respect to the begining
-                  std::sort(currHit.validChainStartEnd.begin(), currHit.validChainStartEnd.end(),
-                            [](const std::pair<int32_t, int32_t>& a, const std::pair<int32_t, int32_t>& b) -> bool {
-                              return a.first <= b.first ;
-                            })  ;
-
                   if (startPositions.size() > 1) {
                     currHit.hasMultiPos = true;
                     while (++posIt != startPositions.end()) {
@@ -733,10 +710,6 @@ namespace rapmap {
 
         auto fwdHitsStart = hits.size();
 
-        // segment related stuff
-        bool isSegmentIndex = rmi.isSegmentIndex();
-        SegmentMappingInfo* smap = isSegmentIndex ? rmi.segInfo.get() : nullptr;
-
         // If the hit we have for a read is contained within a single suffix array interval
         // (i.e. there is only one MMP), then this function is called to collect the relevant
         // hits into `outHits`.
@@ -751,9 +724,6 @@ namespace rapmap {
             for (OffsetT i = saIntervalHit.begin; i != saIntervalHit.end; ++i) {
               auto globalPos = SA[i];
               auto txpID = rmi.transcriptAtPosition(globalPos);
-              // MMP length should have been stored in len
-              auto mmpLen = saIntervalHit.len ;
-
               // the offset into this transcript
               auto pos = globalPos - txpStarts[txpID];
               int32_t hitPos = pos - saIntervalHit.queryPos;
@@ -764,9 +734,6 @@ namespace rapmap {
               //lastHit.queryOffset = saIntervalHit.queryPos;
               lastHit.mateStatus = mateStatus;
               lastHit.allPositions.push_back(hitPos);
-              //[!Yanagi-discover] chain start end positions
-              lastHit.validChainStartEnd.push_back({saIntervalHit.queryPos, saIntervalHit.queryPos + saIntervalHit.len}) ;
-
               lastHit.hasMultiPos = false;
               switch (mateStatus) {
               case rapmap::utils::MateStatus::PAIRED_END_LEFT:
@@ -781,15 +748,8 @@ namespace rapmap {
               default:
                 break;
               }
-              // sort chains with respect to the begining
-              //[!Yanagi-discover] sort those positions accordingly
-              std::sort(lastHit.validChainStartEnd.begin(), lastHit.validChainStartEnd.end(),
-                        [](const std::pair<int32_t, int32_t>& a, const std::pair<int32_t, int32_t>& b) -> bool {
-                          return a.first <= b.first ;
-                        })  ;
               //lastHit.completeMatchType = (saIntervalHit.len == readLen) ? mateStatus : MateStatus::NOTHING;
             }
-
 
             // Now sort these QuasiAlignments by transcript ID (then position)
             auto sortStartIt = outHits.begin() + initialSize;
@@ -882,7 +842,7 @@ namespace rapmap {
                                return (a.tid == b.tid) ? a.chainScore() > b.chainScore() : a.tid < b.tid;
                              });
 
-          //
+          ////
           auto mergeOrientationUnique = [](decltype(hits.begin()) first, decltype(hits.end()) last) -> decltype(hits.end()) {
             if (first == last)
               return last;
@@ -919,54 +879,7 @@ namespace rapmap {
           //                          });
           hits.resize(std::distance(hits.begin(), newEnd));
         }
-
-        // For segment find out the split read condition possible for these
-        // hits on each end, we assume that the hits are sorted by transcript ids
-        bool validSplit = false ;
-
-        //[!Yanagi-discover] the code for assigning split status
-        // will be commmented out in master
-        //for(size_t i = 0; i < hits.size() - 1 ; ++i){
-        //  auto& hi = hits[i] ;
-        //  auto segIDi = hi.tid ;
-        //  auto genei = smap->getGeneOfSeg(segIDi) ;
-        //  // Get the start positions and end position for this i
-        //  // ChainStartEnd
-        //  auto validChainStartEndi = hi.validChainStartEnd ;
-
-        //  for(size_t j = i+1; j < hits.size() ; ++j){
-        //    if(validSplit)
-        //      break ;
-        //    auto& hj = hits[j] ;
-        //    auto segIDj = hj.tid ;
-        //    auto genej = smap->getGeneOfSeg(segIDj) ;
-        //    auto validChainStartEndj = hj.validChainStartEnd ;
-        //    if((genei == genej) && (segIDi != segIDj)){
-        //      for(auto sei : validChainStartEndi){
-        //        for(auto sej : validChainStartEndj){
-        //          if(sei.second < sej.first){
-        //            validSplit = true ;
-        //            break ;
-        //          }
-        //        }
-        //        if(validSplit)
-        //          break ;
-        //      }
-        //    }
-        //    if(validSplit){
-        //      hj.splitStaus = rapmap::utils::SplitStatus::SPLITTED ;
-        //      break ;
-        //    }
-        //  }
-        //  if(validSplit){
-        //    hi.splitStaus = rapmap::utils::SplitStatus::SPLITTED ;
-        //    break ;
-        //  }
-        //}
-
       }
-
-
 
         /**
         * Need to explicitly instantiate the versions we use

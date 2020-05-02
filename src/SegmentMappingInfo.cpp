@@ -63,6 +63,7 @@ bool SegmentMappingInfo::loadFromFile(const std::string& fname,
     segmentID[sn] = ctr;
     ++ctr;
   }
+  segNames = std::vector<std::string>(segmentNames);
 
   // number of segments we care about
   //txpListRanges_.resize(segmentNames.size());
@@ -181,13 +182,14 @@ void SegmentMappingInfo::serialize(const std::string& outDir) {
     segArchive(genesList_);
     segArchive(geneNames_);
     segArchive(segTxPos_);
+    segArchive(segNames);
   }
   mappingStream.close();
 }
 
 bool SegmentMappingInfo::writeSegmentOutput(const std::string& segFile, const std::vector<std::string>& segNames) {
   std::ofstream ofile(segFile+".tsv");
-  
+
   auto lt = countMap_.lock_table();
 
   ofile << "SEG1ID" << '\t';
@@ -236,6 +238,12 @@ bool SegmentMappingInfo::writeSegmentOutput(const std::string& segFile, const st
   // Write New Junctions
   std::ofstream ofile3(segFile+".tsv.njpcounts");
   auto lt3 = newJuncsJPCountMap_.lock_table();
+
+  ofile3 << "SEG1ID" << '\t';
+  if(lt3.begin()->first.second < std::numeric_limits<decltype(lt3.begin()->first.second)>::max())
+     ofile3 << "SEG2ID" << '\t';
+  ofile3 << "count\tpos1\tpos2" << '\n';
+
   for (auto& kv : lt3) {
     auto sp = kv.first;
     ofile3 << segNames[sp.first] << '\t' ;
@@ -247,7 +255,7 @@ bool SegmentMappingInfo::writeSegmentOutput(const std::string& segFile, const st
     }
     ofile3 << '\t' << geneNames_[getGeneOfSeg(sp.first)];
 
-    for (size_t i = 0; i < 8; ++i) {
+    for (size_t i = 0; i < 3; ++i) {
       ofile3 << '\t' << kv.second.typeCounts[i];
     }
     ofile3 << '\n';
@@ -269,6 +277,7 @@ void SegmentMappingInfo::load(const std::string& indDir) {
     segArchive(genesList_);
     segArchive(geneNames_);
     segArchive(segTxPos_);
+    segArchive(segNames);
   }
   mappingStream.close();
 }

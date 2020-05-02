@@ -134,10 +134,6 @@ namespace rapmap {
         }
 
 
-
-
-
-
       uint32_t writeUnalignedPairToStream(fastx_parser::ReadPair& r,
                                           fmt::MemoryWriter& sstream) {
         constexpr uint16_t flags1 = 0x1 | 0x4 | 0x8 | 0x40;
@@ -229,24 +225,6 @@ namespace rapmap {
                 << "AS:i:0\n";
         return 0;
       }
-
-
-      template <typename ReadT, typename IndexT>
-      uint32_t writeSegmentOutputToStream(
-                                          ReadT& r,
-                                          SingleAlignmentFormatter<IndexT>& formatter,
-                                          HitCounters& hctr,
-                                          std::vector<rapmap::utils::QuasiAlignment>& hits,
-                                          fmt::MemoryWriter& sstream
-                                          ) { return 0 ;}
-
-      template <typename ReadPairT, typename IndexT>
-      uint32_t writeSegmentOutputToStream(
-                                          ReadPairT& r,
-                                          PairAlignmentFormatter<IndexT>& formatter,
-                                          HitCounters& hctr,
-                                          std::vector<QuasiAlignment>& jointHits,
-                                          fmt::MemoryWriter& sstream) { return 0 ;}
 
         template <typename ReadT, typename IndexT>
         uint32_t writeAlignmentsToStream(
@@ -699,72 +677,6 @@ template uint32_t rapmap::utils::writeAlignmentsToStream<fastx_parser::ReadSeq, 
 
 // single parser, 64-bit, perfect hash
 template uint32_t rapmap::utils::writeAlignmentsToStream<fastx_parser::ReadSeq, SAIndex64BitPerfect*>(
-		fastx_parser::ReadSeq& r,
-                SingleAlignmentFormatter<SAIndex64BitPerfect*>& formatter,
-                rapmap::utils::HitCounters& hctr,
-                std::vector<rapmap::utils::QuasiAlignment>& jointHits,
-                fmt::MemoryWriter& sstream);
-
-// Explicit instantiations
-// Segment output pair parser, 32-bit, dense hash
-template uint32_t rapmap::utils::writeSegmentOutputToStream<fastx_parser::ReadPair, SAIndex32BitDense*>(
-                fastx_parser::ReadPair& r,
-                PairAlignmentFormatter<SAIndex32BitDense*>& formatter,
-                rapmap::utils::HitCounters& hctr,
-                std::vector<rapmap::utils::QuasiAlignment>& jointHits,
-                fmt::MemoryWriter& sstream);
-
-// pair parser, 64-bit, dense hash
-template uint32_t rapmap::utils::writeSegmentOutputToStream<fastx_parser::ReadPair, SAIndex64BitDense*>(
-                fastx_parser::ReadPair& r,
-                PairAlignmentFormatter<SAIndex64BitDense*>& formatter,
-                rapmap::utils::HitCounters& hctr,
-                std::vector<rapmap::utils::QuasiAlignment>& jointHits,
-                fmt::MemoryWriter& sstream);
-
-// pair parser, 32-bit, perfect hash
-template uint32_t rapmap::utils::writeSegmentOutputToStream<fastx_parser::ReadPair, SAIndex32BitPerfect*>(
-                fastx_parser::ReadPair& r,
-                PairAlignmentFormatter<SAIndex32BitPerfect*>& formatter,
-                rapmap::utils::HitCounters& hctr,
-                std::vector<rapmap::utils::QuasiAlignment>& jointHits,
-                fmt::MemoryWriter& sstream);
-
-// pair parser, 64-bit, perfect hash
-template uint32_t rapmap::utils::writeSegmentOutputToStream<fastx_parser::ReadPair, SAIndex64BitPerfect*>(
-                fastx_parser::ReadPair& r,
-                PairAlignmentFormatter<SAIndex64BitPerfect*>& formatter,
-                rapmap::utils::HitCounters& hctr,
-                std::vector<rapmap::utils::QuasiAlignment>& jointHits,
-                fmt::MemoryWriter& sstream);
-
-
-// single parser, 32-bit, dense hash
-template uint32_t rapmap::utils::writeSegmentOutputToStream<fastx_parser::ReadSeq, SAIndex32BitDense*>(
-		fastx_parser::ReadSeq& r,
-                SingleAlignmentFormatter<SAIndex32BitDense*>& formatter,
-                rapmap::utils::HitCounters& hctr,
-                std::vector<rapmap::utils::QuasiAlignment>& jointHits,
-                fmt::MemoryWriter& sstream);
-
-// single parser, 64-bit, dense hash
-template uint32_t rapmap::utils::writeSegmentOutputToStream<fastx_parser::ReadSeq, SAIndex64BitDense*>(
-		fastx_parser::ReadSeq& r,
-                SingleAlignmentFormatter<SAIndex64BitDense*>& formatter,
-                rapmap::utils::HitCounters& hctr,
-                std::vector<rapmap::utils::QuasiAlignment>& jointHits,
-                fmt::MemoryWriter& sstream);
-
-// single parser, 32-bit, perfect hash
-template uint32_t rapmap::utils::writeSegmentOutputToStream<fastx_parser::ReadSeq, SAIndex32BitPerfect*>(
- 		fastx_parser::ReadSeq& r,
-                SingleAlignmentFormatter<SAIndex32BitPerfect*>& formatter,
-                rapmap::utils::HitCounters& hctr,
-                std::vector<rapmap::utils::QuasiAlignment>& jointHits,
-                fmt::MemoryWriter& sstream);
-
-// single parser, 64-bit, perfect hash
-template uint32_t rapmap::utils::writeSegmentOutputToStream<fastx_parser::ReadSeq, SAIndex64BitPerfect*>(
 		fastx_parser::ReadSeq& r,
                 SingleAlignmentFormatter<SAIndex64BitPerfect*>& formatter,
                 rapmap::utils::HitCounters& hctr,
