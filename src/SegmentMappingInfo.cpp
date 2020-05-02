@@ -189,7 +189,7 @@ void SegmentMappingInfo::serialize(const std::string& outDir) {
 
 bool SegmentMappingInfo::writeSegmentOutput(const std::string& segFile, const std::vector<std::string>& segNames) {
   std::ofstream ofile(segFile+".tsv");
-  
+
   auto lt = countMap_.lock_table();
 
   ofile << "SEG1ID" << '\t';
